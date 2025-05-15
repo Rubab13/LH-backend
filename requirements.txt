@@ -1,0 +1,17 @@
+# --- Web framework & ASGI server
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+
+# --- Pinecone client
+pinecone-client==6.0.0      # latest 4.x (v3 API)
+
+# --- LangChain ecosystem
+langchain-openai==0.3.14
+langchain-pinecone==0.2.5 
+langchain-community==0.3.21   # Retriever helper, etc.
+langchain-core==0.3.54        # Pulled automatically but pinned for consistency
+# --- OpenAI SDK (dependency of langchain‑openai)
+openai==1.75.0
+
+# --- Pydantic for request/response models (FastAPI pulls this, but pin for safety)
+pydantic==2.11.3
