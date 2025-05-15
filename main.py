@@ -22,10 +22,19 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI  # embeddings and chat
 from langchain_pinecone import Pinecone as PineconeVectorStore  # Pinecone vectorstore wrapper
 from langchain.chains import RetrievalQA  # RAG QA chain
 from langchain.prompts import (  # prompt template classes
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
-    HumanMessagePromptTemplate,
+  ChatPromptTemplate,
+  SystemMessagePromptTemplate,
+  AIMessagePromptTemplate,
+  HumanMessagePromptTemplate,
+)
+
+from models import (
+  LoginModel,
+  TokenResponse,
+  QueryRequest,
+  QAResponse,
+  SignupModel,
+  HistoryItem,
 )
 
 # JWT Settings
@@ -49,41 +58,6 @@ client = MongoClient(MONGO_URI)
 db = client["LegalApp"]
 users_collection = db["users"]
 chat_collection = db["chat_history"]
-
-# Pydantic models
-class LoginModel(BaseModel):
-  email: str
-  password: str
-
-class TokenResponse(BaseModel):
-  access_token: str
-  token_type: str
-  user: dict
-
-# Request schema for query endpoint\
-class QueryRequest(BaseModel):
-  query: str  # user question as string
-  id_user: int  # user ID for tracking
-    
-# Response schema for QA endpoint
-class QAResponse(BaseModel):
-  question: str  # original question
-  answer: str  # generated answer
-  #sources: List[str]  # list of source doc references
-    
-class SignupModel(BaseModel):
-  firstName: str
-  lastName: str
-  email: str
-  password: str
-  confirmPassword: str
-  state: str
-  isLegalProfessional: bool
-    
-class HistoryItem(BaseModel):
-  question: str
-  answer: str
-  timestamp: datetime
 
 app = FastAPI()
 
@@ -179,8 +153,6 @@ def signup(user_data: SignupModel):
 
 # — Logging —
 logging.basicConfig(level=logging.INFO)  # configure root logger to INFO level
-
-
 
 # Ensure all required credentials are present
 if not all([OPENAI_API_KEY, NOVITA_API_KEY, PINECONE_API_KEY, PINECONE_ENV]):
@@ -282,7 +254,6 @@ from bson import ObjectId
 async def get_history(user_id: str = Query(...)):
     docs = list(chat_collection.find({"user_id": user_id}).sort("timestamp", -1).limit(100))
     return [{"question": d["question"], "answer": d["answer"], "timestamp": d["timestamp"], "conversation_id": d["conversation_id"]} for d in docs]
-
 
 # Deleting a user account
 @app.delete("/delete-user/{user_id}")
